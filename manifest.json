@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Clean Notebook Screenshots",
+  "version": "2.0",
+  "description": "Hides citation numbers on Google NotebookLM for clean screenshots. Click the icon to toggle.",
+  "permissions": ["storage", "activeTab"],
+  "action": {
+    "default_icon": "icon.png",
+    "default_title": "Toggle Citations"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "128": "icon.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://notebooklm.google.com/notebook/*"],
+      "js": ["content.js"]
+    }
+  ]
+}

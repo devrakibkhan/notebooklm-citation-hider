@@ -1,0 +1,9 @@
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Packages
+*.zip
+*.tar.gz
+*.rar
