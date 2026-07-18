@@ -25,6 +25,71 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
+// Fix math colors using JavaScript to guarantee it matches the visible text color
+function fixMathColors() {
+  const mathRoots = document.querySelectorAll('.katex, .MathJax, mjx-container, math, .math-inline, .math-display');
+  mathRoots.forEach(root => {
+    // Get the true text color from the PARENT element (the paragraph holding the math).
+    // This perfectly matches NotebookLM's current theme (light or dark).
+    const parent = root.parentElement;
+    if (parent) {
+      const correctColor = window.getComputedStyle(parent).color;
+      
+      // Force SVGs (like the square root tick) to use this exact color
+      const svgs = root.querySelectorAll('svg, path, use');
+      svgs.forEach(svg => {
+        svg.style.setProperty('fill', correctColor, 'important');
+        if (window.getComputedStyle(svg).stroke !== 'none') {
+            svg.style.setProperty('stroke', correctColor, 'important');
+        }
+      });
+      
+      // Fix square roots rendered as inline <img> SVG data URIs
+      const imgSvgs = root.querySelectorAll('img.katex-svg');
+      imgSvgs.forEach(img => {
+        // Save the original src the very first time we see it
+        if (!img.dataset.originalSrc) {
+            img.dataset.originalSrc = img.getAttribute('src');
+        }
+        
+        // Only update the image if the color has actually changed
+        if (img.dataset.lastColor !== correctColor) {
+          const originalSrc = img.dataset.originalSrc;
+          let newSrc = originalSrc;
+          
+          if (newSrc.includes('<path')) {
+            newSrc = newSrc.replace('<path', `<path fill="${correctColor}" `);
+          } else if (newSrc.includes('%3Cpath')) {
+            // URL encoded version
+            const encodedColor = encodeURIComponent(correctColor);
+            newSrc = newSrc.replace('%3Cpath', `%3Cpath fill="${encodedColor}" `);
+          }
+          
+          img.setAttribute('src', newSrc);
+          img.dataset.lastColor = correctColor;
+        }
+      });
+      
+      // Force all text and borders to use this exact color
+      root.style.setProperty('color', correctColor, 'important');
+      
+      const allEls = root.querySelectorAll('*');
+      allEls.forEach(el => {
+        // Force text color
+        el.style.setProperty('color', correctColor, 'important');
+        
+        const computed = window.getComputedStyle(el);
+        if (computed.borderTopWidth !== '0px' && computed.borderTopWidth !== '0' && computed.borderTopStyle !== 'none') {
+          el.style.setProperty('border-color', correctColor, 'important');
+        }
+        if (computed.borderBottomWidth !== '0px' && computed.borderBottomWidth !== '0' && computed.borderBottomStyle !== 'none') {
+          el.style.setProperty('border-color', correctColor, 'important');
+        }
+      });
+    }
+  });
+}
+
 // 4. Function to scan and mark citation numbers
 function processCitations() {
   // Only select elements we haven't processed yet
@@ -32,6 +97,12 @@ function processCitations() {
   const citationRegex = /^\[?\d+\]?$/;
 
   elements.forEach((element) => {
+    // Skip elements that are part of math formulas
+    if (element.closest && element.closest('math, .math, .MathJax, .katex, mjx-container, .math-inline, .math-display')) {
+      element.classList.add('notebooklm-processed');
+      return;
+    }
+
     if (element.children.length === 0) {
       const text = (element.textContent || "").trim();
       if (citationRegex.test(text)) {
@@ -55,6 +126,9 @@ function processCitations() {
       }
     }
   });
+  
+  // Apply math color fixes
+  fixMathColors();
 }
 
 // Initial run
@@ -81,3 +155,21 @@ observer.observe(document.body, {
   subtree: true,
   characterData: true
 });
+
+// 6. Listen for Theme Changes (Light <-> Dark mode toggles)
+// This catches system theme changes
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    setTimeout(fixMathColors, 50); // Small delay to let NotebookLM update its text colors first
+});
+
+// This catches NotebookLM's own theme toggle button (which usually modifies the class on HTML or BODY)
+const themeObserver = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+        if (mutation.type === 'attributes' && (mutation.attributeName === 'class' || mutation.attributeName === 'theme' || mutation.attributeName === 'data-theme')) {
+            setTimeout(fixMathColors, 50);
+            break;
+        }
+    }
+});
+themeObserver.observe(document.documentElement, { attributes: true });
+themeObserver.observe(document.body, { attributes: true });
