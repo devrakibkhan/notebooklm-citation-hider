@@ -1,10 +1,10 @@
-# NotebookLM Citation Hider: Clean Screenshots for Google NotebookLM
+# Gemini Notebook (NotebookLM) Citation Hider: Clean Screenshots
 
-A lightweight Google Chrome extension that effortlessly hides or removes citation numbers on Google NotebookLM. If you are looking to take clean, distraction-free screenshots of your NotebookLM chats without the reference pills, this productivity tool is exactly what you need.
+A lightweight Google Chrome extension that effortlessly hides or removes citation numbers on Google's Gemini Notebook (formerly NotebookLM). If you are looking to take clean, distraction-free screenshots of your Gemini Notebook chats without the reference pills, this productivity tool is exactly what you need.
 
 ## ✨ Features
 
-- **Toggle Citations**: Click the extension icon in your toolbar to instantly hide or show citation pills in your NotebookLM workspace.
+- **Toggle Citations**: Click the extension icon in your toolbar to instantly hide or show citation pills in your Gemini Notebook (NotebookLM) workspace.
 - **Visual Badge**: Displays a clear “ON” / “OFF” badge indicating whether citations are currently hidden.
 - **Dynamic Updates**: Uses MutationObservers to handle citations in dynamically loaded chat messages without requiring page reloads.
 
@@ -21,7 +21,7 @@ Since this extension is not yet published on the Chrome Web Store, you can insta
 
 ## 💻 Usage
 
-1. Open [Google NotebookLM](https://notebooklm.google.com).
+1. Open [Gemini Notebook](https://notebooklm.google.com).
 2. You will notice citations are hidden by default (the extension badge says “ON”).
 3. To reveal citations, simply click the extension icon (the badge will change to “OFF”).
 4. Take your clean, distraction-free screenshots!
