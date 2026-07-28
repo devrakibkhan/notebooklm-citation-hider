@@ -1,32 +1,56 @@
-chrome.action.onClicked.addListener(async (tab) => {
-  // Get current state, defaulting to true
-  const { isEnabled = true } = await chrome.storage.local.get("isEnabled");
-  const newState = !isEnabled;
+// Helper to update the extension icon badge contextually
+async function updateBadgeContextually(tabId, url) {
+  if (!url || !url.startsWith('http')) {
+    chrome.action.setBadgeText({ text: "", tabId });
+    return;
+  }
   
-  // Save new state
-  await chrome.storage.local.set({ isEnabled: newState });
+  try {
+    const hostname = new URL(url).hostname;
+    const data = await chrome.storage.local.get(['isEnabled', 'targetDomains']);
+    
+    // Default config logic if empty
+    const isEnabled = data.isEnabled !== false;
+    let targetDomains = data.targetDomains;
+    
+    // Fallback for migration edge cases
+    if (!targetDomains) {
+      const oldData = await chrome.storage.local.get('targetDomain');
+      targetDomains = oldData.targetDomain ? [oldData.targetDomain] : ['notebooklm.google.com'];
+    }
 
-  // Update badge UI
-  updateBadge(newState);
-
-  // Send message to the tab where the user clicked the icon
-  chrome.tabs.sendMessage(tab.id, { action: "toggle", isEnabled: newState }).catch(() => {});
-});
-
-// Helper to update the extension icon badge
-function updateBadge(isEnabled) {
-  chrome.action.setBadgeText({ text: isEnabled ? "ON" : "OFF" });
-  chrome.action.setBadgeBackgroundColor({ color: isEnabled ? "#4CAF50" : "#F44336" });
+    if (targetDomains.includes(hostname)) {
+      chrome.action.setBadgeText({ text: isEnabled ? "ON" : "OFF", tabId });
+      chrome.action.setBadgeBackgroundColor({ color: isEnabled ? "#4CAF50" : "#F44336", tabId });
+    } else {
+      chrome.action.setBadgeText({ text: "", tabId });
+    }
+  } catch (e) {
+    chrome.action.setBadgeText({ text: "", tabId });
+  }
 }
 
-// Set initial badge text when extension is loaded
-chrome.runtime.onInstalled.addListener(() => {
-  updateBadge(true);
-  chrome.storage.local.set({ isEnabled: true });
+// When a tab URL changes
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.url || changeInfo.status === 'complete') {
+    updateBadgeContextually(tabId, tab.url);
+  }
 });
 
-// Update badge if service worker wakes up
-chrome.storage.local.get("isEnabled", (result) => {
-  const isEnabled = result.isEnabled !== false;
-  updateBadge(isEnabled);
+// When the user switches to a different tab
+chrome.tabs.onActivated.addListener(async (activeInfo) => {
+  try {
+    const tab = await chrome.tabs.get(activeInfo.tabId);
+    if (tab) {
+      updateBadgeContextually(tab.id, tab.url);
+    }
+  } catch (e) {
+    // Tab might be closed or unavailable
+  }
+});
+
+// On install, just clear the global badge, we will rely on contextual badges
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.action.setBadgeText({ text: "" });
+  chrome.storage.local.set({ isEnabled: true });
 });

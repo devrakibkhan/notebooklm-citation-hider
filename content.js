@@ -1,4 +1,5 @@
-// 1. Inject a style block into the document that handles the hiding
+function initCitationHider() {
+  // 1. Inject a style block into the document that handles the hiding
 const style = document.createElement('style');
 style.textContent = `
   body.notebooklm-hide-citations .notebooklm-citation-target {
@@ -24,6 +25,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
   }
 });
+} // End of initCitationHider early setup
 
 // Fix math colors using JavaScript to guarantee it matches the visible text color
 function fixMathColors() {
@@ -132,7 +134,8 @@ function processCitations() {
 }
 
 // Initial run
-processCitations();
+function startObservers() {
+  processCitations();
 
 // 5. Use MutationObserver to watch for dynamic changes (new messages, etc.)
 const observer = new MutationObserver((mutations) => {
@@ -173,3 +176,16 @@ const themeObserver = new MutationObserver((mutations) => {
 });
 themeObserver.observe(document.documentElement, { attributes: true });
 themeObserver.observe(document.body, { attributes: true });
+} // End of startObservers
+
+chrome.storage.local.get(['targetDomains', 'targetDomain'], (config) => {
+  let domains = config.targetDomains;
+  if (!domains) {
+    domains = config.targetDomain ? [config.targetDomain] : ['notebooklm.google.com'];
+  }
+  
+  if (domains.includes(window.location.hostname)) {
+    initCitationHider();
+    startObservers();
+  }
+});

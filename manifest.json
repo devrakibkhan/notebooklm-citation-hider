@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Gemini Notebook (NotebookLM) Citation Hider",
-  "version": "2.1",
+  "version": "2.2",
   "description": "Hides citation numbers on Google's Gemini Notebook (formerly NotebookLM) for clean, distraction-free screenshots.",
   "permissions": [
     "storage",
@@ -9,7 +9,8 @@
   ],
   "action": {
     "default_icon": "icon.png",
-    "default_title": "Toggle Citations"
+    "default_title": "Citation Hider",
+    "default_popup": "popup.html"
   },
   "background": {
     "service_worker": "background.js"
@@ -20,7 +21,7 @@
   "content_scripts": [
     {
       "matches": [
-        "https://notebooklm.google.com/notebook/*"
+        "<all_urls>"
       ],
       "js": [
         "content.js"
