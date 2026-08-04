@@ -21,7 +21,7 @@ Since this extension is not yet published on the Chrome Web Store, you can insta
 
 ## 💻 Usage
 
-1. Open [Gemini Notebook](https://notebooklm.google.com).
+1. Open [Gemini Notebook](https://notebook.google.com).
 2. You will notice citations are hidden by default (the extension badge says “ON”).
 3. To reveal citations, simply click the extension icon (the badge will change to “OFF”).
 4. Take your clean, distraction-free screenshots!

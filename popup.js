@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const currentDomainText = document.getElementById('currentDomainText');
 
   // Load current settings
-  // Default to [ 'notebooklm.google.com' ] if not set, or migrate old string
+  // Default to [ 'notebook.google.com' ] if not set, or migrate old string
   let { isEnabled = true, targetDomains } = await chrome.storage.local.get(['isEnabled', 'targetDomains', 'targetDomain']);
   
   // Migration logic for older versions that used string `targetDomain`
@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       targetDomains = [oldDomainData.targetDomain];
       await chrome.storage.local.remove('targetDomain'); // Clean up
     } else {
-      targetDomains = ['notebooklm.google.com'];
+      targetDomains = ['notebook.google.com'];
     }
     await chrome.storage.local.set({ targetDomains });
   }

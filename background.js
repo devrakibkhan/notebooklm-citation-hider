@@ -16,7 +16,7 @@ async function updateBadgeContextually(tabId, url) {
     // Fallback for migration edge cases
     if (!targetDomains) {
       const oldData = await chrome.storage.local.get('targetDomain');
-      targetDomains = oldData.targetDomain ? [oldData.targetDomain] : ['notebooklm.google.com'];
+      targetDomains = oldData.targetDomain ? [oldData.targetDomain] : ['notebook.google.com'];
     }
 
     if (targetDomains.includes(hostname)) {

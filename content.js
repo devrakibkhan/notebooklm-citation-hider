@@ -181,7 +181,7 @@ themeObserver.observe(document.body, { attributes: true });
 chrome.storage.local.get(['targetDomains', 'targetDomain'], (config) => {
   let domains = config.targetDomains;
   if (!domains) {
-    domains = config.targetDomain ? [config.targetDomain] : ['notebooklm.google.com'];
+    domains = config.targetDomain ? [config.targetDomain] : ['notebook.google.com'];
   }
   
   if (domains.includes(window.location.hostname)) {
