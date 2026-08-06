@@ -95,8 +95,7 @@ function fixMathColors() {
 // 4. Function to scan and mark citation numbers
 function processCitations() {
   // Only select elements we haven't processed yet
-  const elements = document.querySelectorAll('button:not(.notebooklm-processed), span:not(.notebooklm-processed), a:not(.notebooklm-processed), div:not(.notebooklm-processed), mark:not(.notebooklm-processed)');
-  const citationRegex = /^\[?\d+\]?$/;
+  const elements = document.querySelectorAll('button:not(.notebooklm-processed), span:not(.notebooklm-processed), a:not(.notebooklm-processed), div:not(.notebooklm-processed), mark:not(.notebooklm-processed), mat-icon:not(.notebooklm-processed)');
 
   elements.forEach((element) => {
     // Skip elements that are part of math formulas
@@ -107,12 +106,33 @@ function processCitations() {
 
     if (element.children.length === 0) {
       const text = (element.textContent || "").trim();
-      if (citationRegex.test(text)) {
+      const ariaLabel = (element.getAttribute('aria-label') || "").toLowerCase();
+      
+      let isCitation = false;
+      
+      // Check if it's a number citation (e.g., "1", "[1]")
+      if (/^\[?\d+\]?$/.test(text)) {
+        isCitation = true;
+      } 
+      // Check if it's a known citation text symbol
+      else if (['><', '>|<', '...', '…'].includes(text)) {
+        isCitation = true;
+      } 
+      // Check if the element explicitly states it's a citation
+      else if (ariaLabel.includes('citation')) {
+        isCitation = true;
+      } 
+      // Check if the parent explicitly states it's a citation
+      else if (element.parentElement && (element.parentElement.getAttribute('aria-label') || "").toLowerCase().includes('citation')) {
+        isCitation = true;
+      }
+
+      if (isCitation) {
         // Traverse up to find the outermost container
         let targetToHide = element;
         while (targetToHide.parentElement) {
           const parent = targetToHide.parentElement;
-          if (['SPAN', 'A', 'SUP', 'BUTTON', 'DIV', 'MARK'].includes(parent.tagName) && 
+          if (['SPAN', 'A', 'SUP', 'BUTTON', 'DIV', 'MARK', 'MAT-ICON'].includes(parent.tagName) && 
               (parent.textContent || "").trim() === text) {
             targetToHide = parent;
           } else {
