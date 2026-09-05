@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Gemini Citation Hider",
-  "version": "2.2",
+  "version": "2.3",
   "description": "Hides citation numbers on Google's Gemini Notebook (formerly NotebookLM) for clean, distraction-free screenshots.",
   "permissions": [
     "storage",
